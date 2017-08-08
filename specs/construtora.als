@@ -1,48 +1,96 @@
 module construtora
 
+//TODOS: Precisa colocar a quantidade de equipes de pedreiro igual a 4
+
 //Entidades
 sig Construtora {
 	
-	pedreiros : set Pedreiro,
+	predio: one Predio, 
+	estadio : one Estadio, 
+	condominio : one Condominio,
 	engenheiros : set Engenheiro, 
-	pintores : one Pintor
+	pintores : one Pintor,
+	pedreiros : some Pedreiro
 
 }
 
-sig Pedreiro{
-	contratante : one Construtora
+abstract sig Equipe{
+	contratante :one Construtora
 }
-sig Pintor{
-	contratante : one Construtora
-}
-sig Engenheiro {
 
-	contratante : one Construtora
+sig Pedreiro in Equipe{
 
 }
-sig EngenheiroCivil extends Engenheiro{}
-sig EngenheiroEletricista extends Engenheiro{}
+sig Pintor in Equipe {
+
+}
+sig Engenheiro in Equipe {
+
+	especialidade : one Especialidade
+}
+
+abstract sig Especialidade{
+
+	engenheiro : one Engenheiro
+
+}
+
+sig Civil extends Especialidade{}
+sig Eletricista extends Especialidade{}
+
+
+
+abstract sig Obra{}
+
+sig Predio extends Obra{
+	construtora : one Construtora
+}
+sig Condominio extends Obra{
+	construtora : one Construtora
+}
+sig Estadio extends Obra{
+	construtora : one Construtora
+}
+
 
 
 //Fatos
 fact EngenheiroCivilOuEletricista {
 
-	Engenheiro = EngenheiroCivil + EngenheiroEletricista
+	Especialidade = Civil + Eletricista
 
 }
 
-fact equipesUnicas {
 
-	all p: Pedreiro | some c:Construtora | p in pedreirosDaConstrutora[c]
+fact EngenheiroComEspecialidadeUnica {
+	all eng:Engenheiro | some e:Especialidade | eng in e.engenheiro
+}
+
+fact todaEquipeEhContratadaPelaConstrutora {
+
+	all E: Pedreiro | some c:Construtora | p in pedreirosDaConstrutora[c]
 	all p:Pintor | some c:Construtora | p in pintoresDaConstrutora[c]
 	all e:Engenheiro | some c:Construtora | e in engenheirosDaConstrutora[c]
-	
+
+}
+
+fact todaObraEhDaConstrutora {
+
+	all p:Predio | some c:Construtora | p in c.predio
+	all e:Estadio | some c:Construtora | e in c.estadio
+	all cond:Condominio | some c:Construtora | cond in c.condominio
 
 }
 
 
 fact ConstrutoraSingleton {
 	#Construtora = 1
+
+}
+
+fact QuantidadeDeEquipes {
+	all c:Construtora | #engenheirosDaConstrutora[c] = 2 
+
 
 }
 
@@ -60,8 +108,12 @@ fun engenheirosDaConstrutora[c:Construtora]: set Engenheiro {
 	c.engenheiros
 }
 
-pred show []{
-	
+pred temPedreiros[c:Construtora]{
 
+	#c.pedreiros = 4
 }
+
+
+pred show []{}
+
 run show
