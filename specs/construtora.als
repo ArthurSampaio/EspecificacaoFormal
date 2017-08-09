@@ -8,9 +8,9 @@ sig Construtora {
 	predio: one Predio, 
 	estadio : one Estadio, 
 	condominio : one Condominio,
-	engenheiros : one Engenheiro, 
-	pintores : one Pintor,
-	pedreiros : set Pedreiro
+	engenheiros : one EquipeEngenheiros, 
+	pintores : one EquipePintores,
+	pedreiros : set EquipePedreiros
 
 }
 
@@ -18,47 +18,66 @@ abstract sig Equipe{
 	contratante : one Construtora
 }
 
-sig Pedreiro in Equipe{
+sig EquipePedreiros in Equipe {}
 
-}
-sig Pintor in Equipe {
+sig EquipePintores in Equipe {}
 
-}
-sig Engenheiro in Equipe {
-
-	especialidade : one Especialidade
+sig EquipeEngenheiros in Equipe {
+	engCivil: one EngCivil
+	engEletricista: one EngEletricista
 }
 
-abstract sig Especialidade{
-
-	engenheiro : one Engenheiro
-
-}
-
-sig Civil extends Especialidade{}
-sig Eletricista extends Especialidade{}
+sig EngCivil {}
+sig EngEletricista {}
 
 
+abstract sig Obra {}
 
-abstract sig Obra{}
-
-sig Predio extends Obra{
-	construtora : one Construtora
-}
-sig Condominio extends Obra{
-	construtora : one Construtora
-}
 sig Estadio extends Obra{
 	construtora : one Construtora
+	fiscal: one FiscalDoEstado
 }
 
+sig FiscalDoEstado {
+}
+
+sig Predio extends Obra {
+	construtora : one Construtora
+	apartamentos: set ApartamentoDePredio
+}
+
+sig Condominio extends Obra {
+	construtora : one Construtora
+	predios: set PredioDeCondominio
+}
+
+sig PredioDeCondominio {
+	apartamentos: set ApartamentoDeCondominio
+}
+
+sig Proprietario {
+}
+
+abstract sig Apartamento {
+	proprietario: one Proprietario
+}
+
+sig ApartamentoDeCondominio {
+	quartos: set Quarto
+}
+
+sig ApartamentoDePredio {
+	quartos: set Quarto
+}
+
+sig Quarto {}
 
 
-//Fatos
+// Fatos
+
 fact EngenheiroCivilOuEletricista {
 
 	Especialidade = Civil + Eletricista
-
 }
 
 
@@ -71,7 +90,6 @@ fact todaEquipeEhContratadaPelaConstrutora {
 	all E: Pedreiro | some c:Construtora | E in pedreirosDaConstrutora[c]
 	all p:Pintor | some c:Construtora | p in pintoresDaConstrutora[c]
 	all e:Engenheiro | some c:Construtora | e in engenheirosDaConstrutora[c]
-
 }
 
 fact todaObraEhDaConstrutora {
@@ -79,19 +97,29 @@ fact todaObraEhDaConstrutora {
 	all p:Predio | some c:Construtora | p in c.predio
 	all e:Estadio | some c:Construtora | e in c.estadio
 	all cond:Condominio | some c:Construtora | cond in c.condominio
-
 }
 
 
 fact ConstrutoraSingleton {
 	#Construtora = 1
-
 }
 
 fact QuantidadeDeEquipes {
 	all c:Construtora | #engenheirosDaConstrutora[c] = 2 
+}
+
+fact ApartamentoDeCondominioTemUmOuDoisQuartos {
+	all apCond:ApartamentoDeCondominio | #(apCond.quartos) => 1 && #(apCond.quartos) =< 2 
+}
 
 
+fact ApartamentoDePredioTemTresQuartos {
+	all apPred:ApartamentoDePredio | #(apPred.quartos) = 3
+}
+
+fact {
+	all ap:Apartamento | one m.proprietario
+	all p.Proprietario | p.~proprietario
 }
 
 //Function
@@ -109,7 +137,6 @@ fun engenheirosDaConstrutora[c:Construtora]: set Engenheiro {
 }
 
 pred temPedreiros[c:Construtora]{
-
 	#c.pedreiros = 4
 }
 
@@ -120,37 +147,25 @@ assert testeTamanhoDasEquipes {
 	all c:Construtora | one c.engenheiros
 }
 
-check testeTamanhoDasEquipes
-
 assert testeTodaObraTemUmaEquipeDePedreiros {
 	all o:Obra | some c:Construtora | #(c.pedreiros) > 0
 }
 
+check testeTamanhoDasEquipes
 check testeTodaObraTemUmaEquipeDePedreiros
 
-assert testeEngenheirosTrabalhamSempreJuntos {
+// Nao implementados ainda
+assert testeEngenheirosTrabalhamSempreJuntos {}
 
-}
+assert testePintoresNaoTrabalhamComEngenheiros {}
 
-assert testePintoresNaoTrabalhamComEngenheiros {
+assert testeTodoApartamentoTemUmDono {}
 
-}
+assert testeQtdQuartosCondominio {}
 
+assert testeQtdQuartosPredio {}
 
-assert testeTodoApartamentoTemUmDono {
-
-}
-
-assert testeQtdQuartosCondominio {
-
-}
-
-assert testeQtdQuartosPredio {
-
-}
-
-assert testeTodaEquipeDeEstadioEhAcompanhadaPorFiscal {
-}
+assert testeTodaEquipeDeEstadioEhAcompanhadaPorFiscal {}
 
 pred show []{}
 
