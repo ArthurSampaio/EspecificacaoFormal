@@ -68,7 +68,7 @@ fact EngenheiroComEspecialidadeUnica {
 
 fact todaEquipeEhContratadaPelaConstrutora {
 
-	all E: Pedreiro | some c:Construtora | p in pedreirosDaConstrutora[c]
+	all E: Pedreiro | some c:Construtora | E in pedreirosDaConstrutora[c]
 	all p:Pintor | some c:Construtora | p in pintoresDaConstrutora[c]
 	all e:Engenheiro | some c:Construtora | e in engenheirosDaConstrutora[c]
 
