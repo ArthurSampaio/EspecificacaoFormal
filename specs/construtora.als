@@ -8,14 +8,14 @@ sig Construtora {
 	predio: one Predio, 
 	estadio : one Estadio, 
 	condominio : one Condominio,
-	engenheiros : set Engenheiro, 
+	engenheiros : one Engenheiro, 
 	pintores : one Pintor,
-	pedreiros : some Pedreiro
+	pedreiros : set Pedreiro
 
 }
 
 abstract sig Equipe{
-	contratante :one Construtora
+	contratante : one Construtora
 }
 
 sig Pedreiro in Equipe{
@@ -113,6 +113,44 @@ pred temPedreiros[c:Construtora]{
 	#c.pedreiros = 4
 }
 
+// Asserções
+assert testeTamanhoDasEquipes {
+	all c:Construtora | #(c.pedreiros) = 4
+	all c:Construtora | one c.pintores
+	all c:Construtora | one c.engenheiros
+}
+
+check testeTamanhoDasEquipes
+
+assert testeTodaObraTemUmaEquipeDePedreiros {
+	all o:Obra | some c:Construtora | #(c.pedreiros) > 0
+}
+
+check testeTodaObraTemUmaEquipeDePedreiros
+
+assert testeEngenheirosTrabalhamSempreJuntos {
+
+}
+
+assert testePintoresNaoTrabalhamComEngenheiros {
+
+}
+
+
+assert testeTodoApartamentoTemUmDono {
+
+}
+
+assert testeQtdQuartosCondominio {
+
+}
+
+assert testeQtdQuartosPredio {
+
+}
+
+assert testeTodaEquipeDeEstadioEhAcompanhadaPorFiscal {
+}
 
 pred show []{}
 
