@@ -1,7 +1,5 @@
 module construtora
 
-//TODOS: Precisa colocar a quantidade de equipes de pedreiro igual a 4
-
 //Entidades
 sig Construtora {
 	
@@ -18,11 +16,11 @@ abstract sig Equipe{
 	contratante : one Construtora
 }
 
-sig EquipePedreiros in Equipe {}
+sig EquipePedreiros extends Equipe {}
 
-sig EquipePintores in Equipe {}
+sig EquipePintores extends Equipe {}
 
-sig EquipeEngenheiros in Equipe {
+sig EquipeEngenheiros extends Equipe {
 
 	engCivil: one EngCivil,
 	engEletricista: one EngEletricista
@@ -57,25 +55,25 @@ sig PredioDeCondominio {
 }
 
 sig Proprietario {
+	apartamento: one Apartamento
 }
 
 abstract sig Apartamento {
 	proprietario: one Proprietario
 }
 
-sig ApartamentoDeCondominio {
-	quartos: set Quarto
+sig ApartamentoDeCondominio extends Apartamento {
+	quartos: set Quarto,
+	predio: one PredioDeCondominio
 }
 
-sig ApartamentoDePredio {
+sig ApartamentoDePredio extends Apartamento {
 	quartos: set Quarto
 }
 
 sig Quarto {}
 
-
-// Fatos
-
+// Facts
 fact todaEquipeEhContratadaPelaConstrutora {
 
 	all E: EquipePedreiros | one c:Construtora | E in pedreirosDaConstrutora[c]
@@ -83,35 +81,13 @@ fact todaEquipeEhContratadaPelaConstrutora {
 	all e:EquipeEngenheiros | one c:Construtora | e in engenheirosDaConstrutora[c]
 }
 
-fact todaObraEhDaConstrutora {
-
-	all p:Predio | some c:Construtora | p in c.predio
-	all e:Estadio | some c:Construtora | e in c.estadio
-	all cond:Condominio | some c:Construtora | cond in c.condominio
+fact todoApartamentoTemUmProprietario {
+	all ap:Apartamento | one ap.proprietario
 }
 
+fact umQuartoNaoPodeSerDeApartamentosDiferentes {
 
-fact ConstrutoraSingleton {
-	#Construtora = 1
 }
-
-fact QuantidadeDeEquipes {
-	all c:Construtora | #engenheirosDaConstrutora[c] = 2 
-}
-
-//fact ApartamentoDeCondominioTemUmOuDoisQuartos {
-//	all apCond:ApartamentoDeCondominio | #(apCond.quartos) => 1 && #(apCond.quartos) =< 2 
-//}
-
-
-//fact ApartamentoDePredioTemTresQuartos {
-	//all apPred:ApartamentoDePredio | #(apPred.quartos) = 3
-//}
-
-//fact {
-	//all ap:Apartamento | one m.proprietario
-	//all p.Proprietario | p.~proprietario
-//}
 
 // Functions
 
@@ -126,37 +102,6 @@ fun pintoresDaConstrutora[c:Construtora]: one EquipePintores {
 fun engenheirosDaConstrutora[c:Construtora]: one EquipeEngenheiros {
 	c.engenheiros
 }
-
-pred temPedreiros[c:Construtora]{
-	#c.pedreiros = 4
-}
-
-// Asserções
-assert testeTamanhoDasEquipes {
-	all c:Construtora | #(c.pedreiros) = 4
-	all c:Construtora | one c.pintores
-	all c:Construtora | one c.engenheiros
-}
-
-//assert testeTodaObraTemUmaEquipeDePedreiros {
-//	all o:Obra | some c:Construtora | #(c.pedreiros) > 0
-//}
-
-check testeTamanhoDasEquipes
-//check testeTodaObraTemUmaEquipeDePedreiros
-
-// Nao implementados ainda
-assert testeEngenheirosTrabalhamSempreJuntos {}
-
-assert testePintoresNaoTrabalhamComEngenheiros {}
-
-assert testeTodoApartamentoTemUmDono {}
-
-assert testeQtdQuartosCondominio {}
-
-assert testeQtdQuartosPredio {}
-
-assert testeTodaEquipeDeEstadioEhAcompanhadaPorFiscal {}
 
 pred show []{}
 
