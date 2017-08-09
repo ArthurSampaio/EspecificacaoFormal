@@ -23,7 +23,8 @@ sig EquipePedreiros in Equipe {}
 sig EquipePintores in Equipe {}
 
 sig EquipeEngenheiros in Equipe {
-	engCivil: one EngCivil
+
+	engCivil: one EngCivil,
 	engEletricista: one EngEletricista
 }
 
@@ -34,7 +35,7 @@ sig EngEletricista {}
 abstract sig Obra {}
 
 sig Estadio extends Obra{
-	construtora : one Construtora
+	construtora : one Construtora,
 	fiscal: one FiscalDoEstado
 }
 
@@ -42,12 +43,12 @@ sig FiscalDoEstado {
 }
 
 sig Predio extends Obra {
-	construtora : one Construtora
+	construtora : one Construtora,
 	apartamentos: set ApartamentoDePredio
 }
 
 sig Condominio extends Obra {
-	construtora : one Construtora
+	construtora : one Construtora,
 	predios: set PredioDeCondominio
 }
 
@@ -75,21 +76,11 @@ sig Quarto {}
 
 // Fatos
 
-fact EngenheiroCivilOuEletricista {
-
-	Especialidade = Civil + Eletricista
-}
-
-
-fact EngenheiroComEspecialidadeUnica {
-	all eng:Engenheiro | some e:Especialidade | eng in e.engenheiro
-}
-
 fact todaEquipeEhContratadaPelaConstrutora {
 
-	all E: Pedreiro | some c:Construtora | E in pedreirosDaConstrutora[c]
-	all p:Pintor | some c:Construtora | p in pintoresDaConstrutora[c]
-	all e:Engenheiro | some c:Construtora | e in engenheirosDaConstrutora[c]
+	all E: EquipePedreiros | one c:Construtora | E in pedreirosDaConstrutora[c]
+	all p:EquipePintores |  one c:Construtora | p in pintoresDaConstrutora[c]
+	all e:EquipeEngenheiros | one c:Construtora | e in engenheirosDaConstrutora[c]
 }
 
 fact todaObraEhDaConstrutora {
@@ -108,31 +99,31 @@ fact QuantidadeDeEquipes {
 	all c:Construtora | #engenheirosDaConstrutora[c] = 2 
 }
 
-fact ApartamentoDeCondominioTemUmOuDoisQuartos {
-	all apCond:ApartamentoDeCondominio | #(apCond.quartos) => 1 && #(apCond.quartos) =< 2 
-}
+//fact ApartamentoDeCondominioTemUmOuDoisQuartos {
+//	all apCond:ApartamentoDeCondominio | #(apCond.quartos) => 1 && #(apCond.quartos) =< 2 
+//}
 
 
-fact ApartamentoDePredioTemTresQuartos {
-	all apPred:ApartamentoDePredio | #(apPred.quartos) = 3
-}
+//fact ApartamentoDePredioTemTresQuartos {
+	//all apPred:ApartamentoDePredio | #(apPred.quartos) = 3
+//}
 
-fact {
-	all ap:Apartamento | one m.proprietario
-	all p.Proprietario | p.~proprietario
-}
+//fact {
+	//all ap:Apartamento | one m.proprietario
+	//all p.Proprietario | p.~proprietario
+//}
 
-//Function
+// Functions
 
-fun pedreirosDaConstrutora[c:Construtora]: set Pedreiro {
+fun pedreirosDaConstrutora[c:Construtora]: set EquipePedreiros {
 	c.pedreiros
 }
 
-fun pintoresDaConstrutora[c:Construtora]: one Pintor{
+fun pintoresDaConstrutora[c:Construtora]: one EquipePintores {
 	c.pintores
 }
 
-fun engenheirosDaConstrutora[c:Construtora]: set Engenheiro {
+fun engenheirosDaConstrutora[c:Construtora]: one EquipeEngenheiros {
 	c.engenheiros
 }
 
@@ -147,12 +138,12 @@ assert testeTamanhoDasEquipes {
 	all c:Construtora | one c.engenheiros
 }
 
-assert testeTodaObraTemUmaEquipeDePedreiros {
-	all o:Obra | some c:Construtora | #(c.pedreiros) > 0
-}
+//assert testeTodaObraTemUmaEquipeDePedreiros {
+//	all o:Obra | some c:Construtora | #(c.pedreiros) > 0
+//}
 
 check testeTamanhoDasEquipes
-check testeTodaObraTemUmaEquipeDePedreiros
+//check testeTodaObraTemUmaEquipeDePedreiros
 
 // Nao implementados ainda
 assert testeEngenheirosTrabalhamSempreJuntos {}
