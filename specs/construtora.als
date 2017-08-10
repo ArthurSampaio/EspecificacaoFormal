@@ -1,116 +1,114 @@
 module construtora
 
-//TODOS: Precisa colocar a quantidade de equipes de pedreiro igual a 4
+//Falta Implementar: Cada apartamento tem um dono (no condomínio e no prédio). No condomínio, existem vários prédios, com apartamentos de um e dois quartos. No prédios, os apartamentos têm todos três quartos.No estádio, cada equipe precisa ser acompanhada por um fiscal do estado; neste caso, cada entrega parcial precisa de ser aprovada.
+
+// Predios do condominio podem ter diferentes quantidadas de quartos?
 
 //Entidades
 sig Construtora {
-	
-	predio: one Predio, 
-	estadio : one Estadio, 
-	condominio : one Condominio,
-	engenheiros : set Engenheiro, 
-	pintores : one Pintor,
-	pedreiros : some Pedreiro
-
+	predio: one Predio,
+	condominio: one Condominio,
+	estadio: one Estadio
 }
 
-abstract sig Equipe{
-	contratante :one Construtora
+abstract sig Obra{
+	pedreiros: one EquipeDePedreiros
 }
-
-sig Pedreiro in Equipe{
-
-}
-sig Pintor in Equipe {
-
-}
-sig Engenheiro in Equipe {
-
-	especialidade : one Especialidade
-}
-
-abstract sig Especialidade{
-
-	engenheiro : one Engenheiro
-
-}
-
-sig Civil extends Especialidade{}
-sig Eletricista extends Especialidade{}
-
-
-
-abstract sig Obra{}
 
 sig Predio extends Obra{
 	construtora : one Construtora
 }
-sig Condominio extends Obra{
-	construtora : one Construtora
+
+sig PredioDoCondominio{
+	apartamentos1Quarto: set ApartamentoComUmQuarto,
+	apartamentos2Quartos: set ApartamentoComDoisQuartos
 }
+
+sig Condominio extends Obra{
+	construtora : one Construtora,
+	predios: set PredioDoCondominio
+}
+
 sig Estadio extends Obra{
 	construtora : one Construtora
 }
 
 
+sig EquipeDePedreiros {
+	obra: lone Obra
+}
+
+sig EquipeDePintores {
+	obra : one Obra
+}
+
+abstract sig Engenheiro {
+	obra : one Obra
+}
+
+sig EngenheiroEletricista extends Engenheiro {
+}
+
+sig EngenheiroCivil extends Engenheiro {
+
+}
+
+abstract sig Apartamento{
+}
+
+sig ApartamentoComUmQuarto extends Apartamento {
+	predio: one PredioDoCondominio
+	
+}
+
+sig ApartamentoComDoisQuartos extends Apartamento {
+	predio: one PredioDoCondominio
+}
+
+sig ApartamentoComTresQuartos extends Apartamento {
+	//Ta solto, falta implementar
+	
+}
+
+//Funções
+fun PrediosDoCondominio[c:Condominio]: set PredioDoCondominio {
+	c.predios
+} 
+
 
 //Fatos
-fact EngenheiroCivilOuEletricista {
 
-	Especialidade = Civil + Eletricista
+fact quartosDosAptosDoCond {
+	all pdc:PredioDoCondominio | all apt:ApartamentoComUmQuarto 
+	| (apt in pdc.apartamentos1Quarto) => apt.predio = pdc
 
+	all pdc:PredioDoCondominio | all apt:ApartamentoComDoisQuartos 
+	| (apt in pdc.apartamentos2Quartos) => apt.predio = pdc
 }
 
-
-fact EngenheiroComEspecialidadeUnica {
-	all eng:Engenheiro | some e:Especialidade | eng in e.engenheiro
+fact ContrutoraUnica {
+	#Construtora = 1	
 }
 
-fact todaEquipeEhContratadaPelaConstrutora {
-
-	all E: Pedreiro | some c:Construtora | E in pedreirosDaConstrutora[c]
-	all p:Pintor | some c:Construtora | p in pintoresDaConstrutora[c]
-	all e:Engenheiro | some c:Construtora | e in engenheirosDaConstrutora[c]
-
+fact UmaObraDeCada {
+	#Predio = 1
+	#Condominio = 1
+	#Estadio = 1
 }
 
-fact todaObraEhDaConstrutora {
-
-	all p:Predio | some c:Construtora | p in c.predio
-	all e:Estadio | some c:Construtora | e in c.estadio
-	all cond:Condominio | some c:Construtora | cond in c.condominio
-
+fact QuantidadeDeFuncionarios {
+	#EngenheiroEletricista = 1
+	#EngenheiroCivil = 1
+	#EquipeDePintores = 1
+	all p:EquipeDePedreiros | all o:Obra | o.pedreiros = p => p.obra = o
 }
 
-
-fact ConstrutoraSingleton {
-	#Construtora = 1
-
+fact EngenheirosUnidos {
+	all e:EngenheiroEletricista | all c:EngenheiroCivil | e.obra = c.obra 
 }
 
-fact QuantidadeDeEquipes {
-	all c:Construtora | #engenheirosDaConstrutora[c] = 2 
-
-
-}
-
-//Function
-
-fun pedreirosDaConstrutora[c:Construtora]: set Pedreiro {
-	c.pedreiros
-}
-
-fun pintoresDaConstrutora[c:Construtora]: one Pintor{
-	c.pintores
-}
-
-fun engenheirosDaConstrutora[c:Construtora]: set Engenheiro {
-	c.engenheiros
-}
-
-pred temPedreiros[c:Construtora]{
-
-	#c.pedreiros = 4
+fact EngenheirosSeparadosDosPintores {
+	all e:Engenheiro | all p:EquipeDePintores | e.obra != p.obra
 }
 
 
