@@ -52,7 +52,7 @@ sig EngenheiroEletricista extends Engenheiro {}
 sig EngenheiroCivil extends Engenheiro {}
 
 // Dono de algum prédio ou apartamento
-sig Dono {
+sig Pessoa {
 	apartamento: some Apartamento
 }
 
@@ -60,7 +60,7 @@ sig Dono {
 sig Fiscal {}
 
 abstract sig Apartamento {
-	dono: one Dono
+	pessoa: one Pessoa
 }
 
 sig ApartamentoComUmQuarto extends Apartamento {
@@ -80,11 +80,10 @@ fun PrediosDoCondominio[c:Condominio]: set PredioDoCondominio {
 	c.predios
 } 
 
-
 // Fatos
 
 fact ApartamentoComDonos {
-	all d: Dono | all apt: Apartamento | apt.dono = d => d.apartamento = apt
+	all p: Pessoa | all apt: Apartamento | apt.pessoa = p => p.apartamento = apt
 }
 
 fact quartosDosAptosDoCond {
@@ -119,7 +118,6 @@ fact EngenheirosUnidos {
 fact EngenheirosSeparadosDosPintores {
 	all e:Engenheiro | all p:EquipeDePintores | e.obra != p.obra
 }
-
 
 pred show []{}
 
