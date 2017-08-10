@@ -7,32 +7,13 @@ sig Construtora {
 	
 	predio : one Predio, 
 	estadio : one Estadio, 
-	condominio : one Condominio,
-	engenheiros : set Engenheiro, 
-	pintores : set Pintor,
-	pedreiros : set Pedreiro
+	condominio : one Condominio
 }
 
-abstract sig Equipe {
-	contratante : one Construtora
+ // Uma obra (predio, condominio ou estadio) tem uma construtora.
+abstract sig Obra {
+		pedreiros : set EquipeDePedreiros
 }
-
-sig Pedreiro in Equipe {}
-sig Pintor in Equipe {}
-sig Engenheiro in Equipe {
-	especialidade : one Especialidade
-}
-
-// Especialidade do engenheiro, na qual pode ser civil ou eletricista.
-abstract sig Especialidade {
-	engenheiro : one Engenheiro
-}
-
-sig Civil extends Especialidade{}
-sig Eletricista extends Especialidade{}
-
-
-abstract sig Obra{} // Uma obra (predio, condominio ou estadio) tem uma construtora.
 
 sig Predio extends Obra {
 	construtora : one Construtora
@@ -44,59 +25,57 @@ sig Estadio extends Obra {
 	construtora : one Construtora
 }
 
-// Fatos
+// Equipes
+sig EquipeDePedreiros {
+	obra: lone Obra
+}
+
+sig EquipeDePintores {
+	obra : one Obra
+}
+
+// Especialidade do engenheiro, na qual pode ser civil ou eletricista.
+abstract sig Especialidade {
+	engenheiro : one Engenheiro
+}
+
+sig EngenheiroEletricista extends Especialidade {}
+sig EngenheiroCivil extends Especialidade {}
+
+abstract sig Engenheiro {
+	obra : one Obra,
+	especialidade: one Especialidade
+
+}
+
 fact EngenheiroCivilOuEletricista {
-	Especialidade = Civil + Eletricista
+	Especialidade = EngenheiroEletricista + EngenheiroCivil
 }
 
 fact EngenheiroComEspecialidadeUnica {
 	all eng: Engenheiro | some e: Especialidade | eng in e.engenheiro
 }
 
-fact todaEquipeEhContratadaPelaConstrutora {
-	all E: Pedreiro | some c: Construtora | E in pedreirosDaConstrutora[c]
-	all p: Pintor | some c: Construtora | p in pintoresDaConstrutora[c]
-	all e: Engenheiro | some c: Construtora | e in engenheirosDaConstrutora[c]
-
+fact FuncionariosPorObra {
+	#EngenheiroCivil = 1
+	#EngenheiroEletricista = 1
+	#EquipeDePintores = 1
+	all p: EquipeDePedreiros | all o: Obra | o.pedreiros = p => p.obra = o
 }
 
-fact todaObraEhDaConstrutora {
-
-	all p: Predio | some c: Construtora | p in c.predio
-	all e: Estadio | some c: Construtora | e in c.estadio
-	all cond: Condominio | some c: Construtora | cond in c.condominio
-
+fact ContrutoraUnica {
+	#Construtora = 1	
 }
 
-fact ConstrutoraSingleton {
-	#Construtora = 1
+fact UmaObraDeCada {
+	#Predio = 1
+	#Condominio = 1
+	#Estadio = 1
 }
 
-fact QuantidadeDeEquipes {
-	all c: Construtora | #(engenheirosDaConstrutora[c]) = 2 && #(pedreirosDaConstrutora[c]) = 4
-
+fact EngenheirosSeparadosDosPintores {
+	all e: Engenheiro | all p: EquipeDePintores | e.obra != p.obra
 }
-
-
-
-//Funcoes
-
-fun pedreirosDaConstrutora[c:Construtora]: set Pedreiro {
-	c.pedreiros
-}
-
-fun pintoresDaConstrutora[c:Construtora]: one Pintor {
-	c.pintores
-}
-
-fun engenheirosDaConstrutora[c:Construtora]: set Engenheiro {
-	c.engenheiros
-}
-
---pred temPedreiros[c:Construtora] {
-	--#(c.pedreiros) = 4
---}
-
 
 pred show []{}
 
