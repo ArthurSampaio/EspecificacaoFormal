@@ -17,7 +17,6 @@ abstract sig Obra {
 }
 
 sig Predio extends Obra {
-	dono: one Dono,
 	construtora : one Construtora,
 	apartamento3Quartos: set ApartamentoComTresQuartos
 }
@@ -53,7 +52,9 @@ sig EngenheiroEletricista extends Engenheiro {}
 sig EngenheiroCivil extends Engenheiro {}
 
 // Dono de algum prédio ou apartamento
-sig Dono {}
+sig Dono {
+	apartamento: some Apartamento
+}
 
 // Fiscal do estado; a obra obrigatoriamente deve ter um. Se a obra tem um, então ela é aprovada.
 sig Fiscal {}
@@ -64,7 +65,6 @@ abstract sig Apartamento {
 
 sig ApartamentoComUmQuarto extends Apartamento {
 	predio: one PredioDoCondominio
-	
 }
 
 sig ApartamentoComDoisQuartos extends Apartamento {
@@ -73,7 +73,6 @@ sig ApartamentoComDoisQuartos extends Apartamento {
 
 sig ApartamentoComTresQuartos extends Apartamento {
 	predio: one Predio
-	
 }
 
 // Funções
@@ -83,6 +82,10 @@ fun PrediosDoCondominio[c:Condominio]: set PredioDoCondominio {
 
 
 // Fatos
+
+fact ApartamentoComDonos {
+	all d: Dono | all apt: Apartamento | apt.dono = d => d.apartamento = apt
+}
 
 fact quartosDosAptosDoCond {
 	all pdc: PredioDoCondominio | all apt: ApartamentoComUmQuarto 
