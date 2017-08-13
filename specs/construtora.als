@@ -156,7 +156,11 @@ pred show []{
 	#Construtora = 1	
 }
 
+assert engenheirosTrabalhamSempreJuntos {
+	all ee:EngenheiroEletricista | all ec:EngenheiroCivil | ee.obra = ec.obra
+}
 
+check engenheirosTrabalhamSempreJuntos
 
 run show for 3 but 8 Apartamento
 
