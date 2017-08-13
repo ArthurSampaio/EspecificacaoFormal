@@ -1,119 +1,162 @@
 module construtora
 
-//TODOS: Precisa colocar a quantidade de equipes de pedreiro igual a 4
+
 
 //Entidades
 sig Construtora {
-	
-	predio: one Predio, 
-	estadio : one Estadio, 
-	condominio : one Condominio,
-	engenheiros : set Engenheiro, 
-	pintores : one Pintor,
-	pedreiros : some Pedreiro
-
+	predio: one Predio,
+	condominio: one Condominio,
+	estadio: one Estadio
 }
 
-abstract sig Equipe{
-	contratante :one Construtora
+abstract sig Obra{
+	pedreiros: one EquipeDePedreiros
 }
-
-sig Pedreiro in Equipe{
-
-}
-sig Pintor in Equipe {
-
-}
-sig Engenheiro in Equipe {
-
-	especialidade : one Especialidade
-}
-
-abstract sig Especialidade{
-
-	engenheiro : one Engenheiro
-
-}
-
-sig Civil extends Especialidade{}
-sig Eletricista extends Especialidade{}
-
-
-
-abstract sig Obra{}
 
 sig Predio extends Obra{
-	construtora : one Construtora
+	construtora : one Construtora,
+	apartamentos : set ApartamentoComTresQuartos
 }
+
+sig PredioDoCondominio{
+	condominio : one Condominio, 
+	apartamentos1Quarto: set ApartamentoComUmQuarto,
+	apartamentos2Quartos: set ApartamentoComDoisQuartos
+}
+
 sig Condominio extends Obra{
-	construtora : one Construtora
+	construtora : one Construtora,
+	predios: set PredioDoCondominio
 }
+
 sig Estadio extends Obra{
 	construtora : one Construtora
 }
 
 
+sig EquipeDePedreiros {
+	obra: lone Obra
+}
+
+one sig EquipeDePintores {
+	obra : one Obra
+}
+
+abstract sig Engenheiro {
+	obra : one Obra
+}
+
+one sig EngenheiroEletricista extends Engenheiro {}
+
+one sig EngenheiroCivil extends Engenheiro {}
+
+abstract sig Apartamento{
+	dono : one Pessoa
+}
+
+sig ApartamentoComUmQuarto extends Apartamento {
+	predio: one PredioDoCondominio
+	
+}
+
+sig ApartamentoComDoisQuartos extends Apartamento {
+	predio: one PredioDoCondominio
+}
+
+
+sig ApartamentoComTresQuartos extends Apartamento {
+	--Esse tipo de apartamento é apenas para prédios	
+	predio : one Predio
+
+}
+
+sig Pessoa{
+	apartamentos : some Apartamento
+}
+
+//Funções
+
+
+
+fun PrediosDoCondominio[c:Condominio]: set PredioDoCondominio {
+	c.predios
+} 
+
 
 //Fatos
-fact EngenheiroCivilOuEletricista {
 
-	Especialidade = Civil + Eletricista
+fact PredioDoCondominioPossuiQuartos {
+	all p:PredioDoCondominio | QuantidadeDeQuartos[p]
+}
 
+fact TodoPredioDeCondominioTemUmCondominio {
+
+	all p:PredioDoCondominio | some c:Condominio | PredioEstaNoCondominio[p,c]
+}
+
+fact QuantidadeDePrediosPorCondominio {
+	all c: Condominio| #c.predios = 2	
+}
+
+fact TodaPessoaTemPeloMenosUmApartamento {
+	all p:Pessoa | temApartamentos[p]
+	all ap:Apartamento | all p:Pessoa | apartamentoTemDonoUnico[ap,p]
+}
+
+fact quartosDosAptosDoCond {
+	all pdc:PredioDoCondominio | all apt:ApartamentoComUmQuarto 
+	| (apt in pdc.apartamentos1Quarto) => apt.predio = pdc
+
+	all pdc:PredioDoCondominio | all apt:ApartamentoComDoisQuartos 
+	| (apt in pdc.apartamentos2Quartos) => apt.predio = pdc
 }
 
 
-fact EngenheiroComEspecialidadeUnica {
-	all eng:Engenheiro | some e:Especialidade | eng in e.engenheiro
+fact PedreirosTrabalhamEmApenasUmObraPorVez {
+	all p:EquipeDePedreiros | all o:Obra | pedreirosEmUmaUnicaObra[p,o]
 }
 
-fact todaEquipeEhContratadaPelaConstrutora {
-
-	all E: Pedreiro | some c:Construtora | E in pedreirosDaConstrutora[c]
-	all p:Pintor | some c:Construtora | p in pintoresDaConstrutora[c]
-	all e:Engenheiro | some c:Construtora | e in engenheirosDaConstrutora[c]
-
+fact EngenheirosUnidos {
+	all e:EngenheiroEletricista | all c:EngenheiroCivil | e.obra = c.obra 
 }
 
-fact todaObraEhDaConstrutora {
-
-	all p:Predio | some c:Construtora | p in c.predio
-	all e:Estadio | some c:Construtora | e in c.estadio
-	all cond:Condominio | some c:Construtora | cond in c.condominio
-
+fact EngenheirosSeparadosDosPintores {
+	all e:Engenheiro | all p:EquipeDePintores | engenheiroNaoTrabalhaComPintores[e,p]
 }
 
+//Predicados
 
-fact ConstrutoraSingleton {
-	#Construtora = 1
+pred QuantidadeDeQuartos[p:PredioDoCondominio]{
+
+	#p.apartamentos1Quarto = 2 <=> #p.apartamentos2Quartos = 2
 
 }
 
-fact QuantidadeDeEquipes {
-	all c:Construtora | #engenheirosDaConstrutora[c] = 2 
-
-
+pred PredioEstaNoCondominio[p:PredioDoCondominio, c:Condominio]{
+	 p.condominio = c <=> p in c.predios
 }
 
-//Function
-
-fun pedreirosDaConstrutora[c:Construtora]: set Pedreiro {
-	c.pedreiros
+pred temApartamentos[p:Pessoa]{
+	some p.apartamentos
 }
 
-fun pintoresDaConstrutora[c:Construtora]: one Pintor{
-	c.pintores
+pred pedreirosEmUmaUnicaObra[p:EquipeDePedreiros, o:Obra]{
+	 o.pedreiros = p => p.obra = o
 }
 
-fun engenheirosDaConstrutora[c:Construtora]: set Engenheiro {
-	c.engenheiros
+pred engenheiroNaoTrabalhaComPintores[e:Engenheiro, p:EquipeDePintores]{
+	 e.obra != p.obra
 }
 
-pred temPedreiros[c:Construtora]{
+pred apartamentoTemDonoUnico[ap:Apartamento, p:Pessoa]{
+	ap.dono = p <=> ap in p.apartamentos
+}
 
-	#c.pedreiros = 4
+pred show []{
+	#Construtora = 1	
 }
 
 
-pred show []{}
 
-run show
+run show for 3 but 8 Apartamento
+
