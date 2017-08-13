@@ -160,6 +160,11 @@ assert engenheirosTrabalhamSempreJuntos {
 	all ee:EngenheiroEletricista | all ec:EngenheiroCivil | ee.obra = ec.obra
 }
 
+assert prediosTemApartamentosDeTresQuartos {
+	all p:Predio | all ap3q:ApartamentoComTresQuartos | (ap3q in p.apartamentos) => ap3q.predio = p
+}
+
+check prediosTemApartamentosDeTresQuartos
 check engenheirosTrabalhamSempreJuntos
 
 run show for 3 but 8 Apartamento
