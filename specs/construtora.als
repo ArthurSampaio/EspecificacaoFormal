@@ -1,8 +1,6 @@
 module construtora
 
-//Falta Implementar: Cada apartamento tem um dono (no condomínio e no prédio). No condomínio, existem vários prédios, com apartamentos de um e dois quartos. No prédios, os apartamentos têm todos três quartos.No estádio, cada equipe precisa ser acompanhada por um fiscal do estado; neste caso, cada entrega parcial precisa de ser aprovada.
 
-// Predios do condominio podem ter diferentes quantidadas de quartos?
 
 //Entidades
 sig Construtora {
@@ -16,10 +14,12 @@ abstract sig Obra{
 }
 
 sig Predio extends Obra{
-	construtora : one Construtora
+	construtora : one Construtora,
+	apartamentos : set ApartamentoComTresQuartos
 }
 
 sig PredioDoCondominio{
+	condominio : one Condominio, 
 	apartamentos1Quarto: set ApartamentoComUmQuarto,
 	apartamentos2Quartos: set ApartamentoComDoisQuartos
 }
@@ -76,12 +76,27 @@ sig Pessoa{
 
 //Funções
 
+
+
 fun PrediosDoCondominio[c:Condominio]: set PredioDoCondominio {
 	c.predios
 } 
 
 
 //Fatos
+
+fact PredioDoCondominioPossuiQuartos {
+	all p:PredioDoCondominio | QuantidadeDeQuartos[p]
+}
+
+fact TodoPredioDeCondominioTemUmCondominio {
+
+	all p:PredioDoCondominio | some c:Condominio | PredioEstaNoCondominio[p,c]
+}
+
+fact QuantidadeDePrediosPorCondominio {
+	all c: Condominio| #c.predios = 2	
+}
 
 fact TodaPessoaTemPeloMenosUmApartamento {
 	all p:Pessoa | temApartamentos[p]
@@ -111,6 +126,16 @@ fact EngenheirosSeparadosDosPintores {
 
 //Predicados
 
+pred QuantidadeDeQuartos[p:PredioDoCondominio]{
+
+	#p.apartamentos1Quarto = 2 <=> #p.apartamentos2Quartos = 2
+
+}
+
+pred PredioEstaNoCondominio[p:PredioDoCondominio, c:Condominio]{
+	 p.condominio = c <=> p in c.predios
+}
+
 pred temApartamentos[p:Pessoa]{
 	some p.apartamentos
 }
@@ -133,5 +158,5 @@ pred show []{
 
 
 
-run show
+run show for 3 but 8 Apartamento
 
