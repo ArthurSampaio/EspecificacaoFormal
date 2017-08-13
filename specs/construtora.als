@@ -30,7 +30,8 @@ sig Condominio extends Obra{
 }
 
 sig Estadio extends Obra{
-	construtora : one Construtora
+	construtora : one Construtora,
+	fiscal: one FiscalDoEstado
 }
 
 
@@ -74,6 +75,9 @@ sig Pessoa{
 	apartamentos : some Apartamento
 }
 
+sig FiscalDoEstado {
+	estadio: one Estadio
+}
 //Funções
 
 
@@ -124,6 +128,10 @@ fact EngenheirosSeparadosDosPintores {
 	all e:Engenheiro | all p:EquipeDePintores | engenheiroNaoTrabalhaComPintores[e,p]
 }
 
+fact estadioTemFiscal {
+	all e:Estadio | temFiscal[e]
+}
+
 //Predicados
 
 pred QuantidadeDeQuartos[p:PredioDoCondominio]{
@@ -152,6 +160,9 @@ pred apartamentoTemDonoUnico[ap:Apartamento, p:Pessoa]{
 	ap.dono = p <=> ap in p.apartamentos
 }
 
+pred temFiscal[e:Estadio] {
+	one e.fiscal
+}
 pred show []{
 	#Construtora = 1	
 }
@@ -164,8 +175,13 @@ assert prediosTemApartamentosDeTresQuartos {
 	all p:Predio | all ap3q:ApartamentoComTresQuartos | (ap3q in p.apartamentos) => ap3q.predio = p
 }
 
-check prediosTemApartamentosDeTresQuartos
-check engenheirosTrabalhamSempreJuntos
+assert estadioSempreTemFiscal {
+	all e:Estadio | all f:FiscalDoEstado | e.fiscal = f => f.estadio = e
+}
+
+//check prediosTemApartamentosDeTresQuartos
+//check engenheirosTrabalhamSempreJuntos
+//check estadioSempreTemFiscal
 
 run show for 3 but 8 Apartamento
 
