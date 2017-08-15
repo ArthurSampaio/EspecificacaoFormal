@@ -31,7 +31,9 @@ one sig Condominio extends Obra{
 
 one sig Estadio extends Obra{
 	construtora : one Construtora,
-	fiscal: one FiscalDoEstado
+	fiscal: one FiscalDoEstado,
+	pintores : lone EquipeDePintores
+
 }
 
 
@@ -88,6 +90,8 @@ fun PrediosDoCondominio[c:Condominio]: set PredioDoCondominio {
 
 
 //Fatos
+
+
 
 fact PrediosDoCondominioTemApartamentos {
  all p: PredioDoCondominio | #p.apartamentos1Quarto = 2 and #p.apartamentos2Quartos = 2
@@ -148,6 +152,7 @@ fact aptosDoPredio {
 	all prd:Predio | #prd.aptos = 8
 }
 
+
 //Predicados
 
 pred QuantidadeDeQuartos[p:PredioDoCondominio]{
@@ -177,7 +182,7 @@ pred apartamentoTemDonoUnico[ap:Apartamento, p:Pessoa]{
 }
 
 pred temFiscal[e:Estadio] {
-	one e.fiscal
+	#e.fiscal >= 1
 }
 pred show []{
 	#Construtora = 1	
