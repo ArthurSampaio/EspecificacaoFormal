@@ -89,6 +89,10 @@ fun PrediosDoCondominio[c:Condominio]: set PredioDoCondominio {
 
 //Fatos
 
+fact PrediosDoCondominioTemApartamentos {
+ all p: PredioDoCondominio | #p.apartamentos1Quarto = 2 and #p.apartamentos2Quartos = 2
+}
+
 fact EquipesDePedreiro {
 	#EquipeDePedreiros = 4
 	all edp:EquipeDePedreiros | all o:Obra | edp.obra = o => o.pedreiros = edp
@@ -179,6 +183,9 @@ pred show []{
 	#Construtora = 1	
 }
 
+
+--Asserts 
+
 assert engenheirosTrabalhamSempreJuntos {
 	all ee:EngenheiroEletricista | all ec:EngenheiroCivil | ee.obra = ec.obra
 }
@@ -195,4 +202,4 @@ assert estadioSempreTemFiscal {
 //check engenheirosTrabalhamSempreJuntos
 //check estadioSempreTemFiscal
 
-run show for 4  but 8 Apartamento
+run show for 4  but 20 Apartamento
