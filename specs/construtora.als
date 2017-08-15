@@ -13,7 +13,7 @@ abstract sig Obra{
 	pedreiros: one EquipeDePedreiros
 }
 
-sig Predio extends Obra{
+one sig Predio extends Obra{
 	construtora : one Construtora,
 	aptos : set ApartamentoComTresQuartos
 }
@@ -24,12 +24,12 @@ sig PredioDoCondominio{
 	apartamentos2Quartos: set ApartamentoComDoisQuartos
 }
 
-sig Condominio extends Obra{
+one sig Condominio extends Obra{
 	construtora : one Construtora,
 	predios: set PredioDoCondominio
 }
 
-sig Estadio extends Obra{
+one sig Estadio extends Obra{
 	construtora : one Construtora,
 	fiscal: one FiscalDoEstado
 }
@@ -93,14 +93,6 @@ fact EquipesDePedreiro {
 	#EquipeDePedreiros = 4
 	all edp:EquipeDePedreiros | all o:Obra | edp.obra = o => o.pedreiros = edp
 }
-
-fact NumeroDeObras{
-	#Estadio = 1
-	#Predio = 1
-	#Condominio = 1
-}
-
-
 
 fact PredioDoCondominioPossuiQuartos {
 	all p:PredioDoCondominio | QuantidadeDeQuartos[p]
