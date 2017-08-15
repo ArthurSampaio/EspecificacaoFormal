@@ -15,7 +15,7 @@ abstract sig Obra{
 
 sig Predio extends Obra{
 	construtora : one Construtora,
-	apartamentos : set ApartamentoComTresQuartos
+	aptos : set ApartamentoComTresQuartos
 }
 
 sig PredioDoCondominio{
@@ -89,6 +89,19 @@ fun PrediosDoCondominio[c:Condominio]: set PredioDoCondominio {
 
 //Fatos
 
+fact EquipesDePedreiro {
+	#EquipeDePedreiros = 4
+	all edp:EquipeDePedreiros | all o:Obra | edp.obra = o => o.pedreiros = edp
+}
+
+fact NumeroDeObras{
+	#Estadio = 1
+	#Predio = 1
+	#Condominio = 1
+}
+
+
+
 fact PredioDoCondominioPossuiQuartos {
 	all p:PredioDoCondominio | QuantidadeDeQuartos[p]
 }
@@ -115,7 +128,6 @@ fact quartosDosAptosDoCond {
 	| (apt in pdc.apartamentos2Quartos) => apt.predio = pdc
 }
 
-
 fact PedreirosTrabalhamEmApenasUmObraPorVez {
 	all p:EquipeDePedreiros | all o:Obra | pedreirosEmUmaUnicaObra[p,o]
 }
@@ -130,6 +142,14 @@ fact EngenheirosSeparadosDosPintores {
 
 fact estadioTemFiscal {
 	all e:Estadio | temFiscal[e]
+}
+
+fact numDePredios {
+	#PredioDoCondominio = 2
+}
+
+fact aptosDoPredio {
+	all prd:Predio | #prd.aptos = 8
 }
 
 //Predicados
@@ -172,7 +192,7 @@ assert engenheirosTrabalhamSempreJuntos {
 }
 
 assert prediosTemApartamentosDeTresQuartos {
-	all p:Predio | all ap3q:ApartamentoComTresQuartos | (ap3q in p.apartamentos) => ap3q.predio = p
+	all p:Predio | all ap3q:ApartamentoComTresQuartos | (ap3q in p.aptos) => ap3q.predio = p
 }
 
 assert estadioSempreTemFiscal {
@@ -183,5 +203,4 @@ assert estadioSempreTemFiscal {
 //check engenheirosTrabalhamSempreJuntos
 //check estadioSempreTemFiscal
 
-run show for 3 but 8 Apartamento
-
+run show for 4  but 8 Apartamento
