@@ -31,7 +31,7 @@ one sig Condominio extends Obra{
 
 one sig Estadio extends Obra{
 	construtora : one Construtora,
-	fiscal: one FiscalDoEstado,
+	fiscal: lone FiscalDoEstado,
 	pintores : lone EquipeDePintores
 
 }
@@ -82,6 +82,11 @@ sig FiscalDoEstado {
 }
 //Funções
 
+fact UmFiscalAMaisNoEstadio {
+
+	all e:Estadio | some p:EquipeDePintores | p in e.pintores => #e.fiscal = 2
+
+}
 
 
 fun PrediosDoCondominio[c:Condominio]: set PredioDoCondominio {
@@ -89,7 +94,14 @@ fun PrediosDoCondominio[c:Condominio]: set PredioDoCondominio {
 } 
 
 
+fun pedreirosDaObra[o:Obra]:one EquipeDePedreiros{
+	o.pedreiros
+}
+
+
+
 //Fatos
+
 
 
 
@@ -170,7 +182,7 @@ pred temApartamentos[p:Pessoa]{
 }
 
 pred pedreirosEmUmaUnicaObra[p:EquipeDePedreiros, o:Obra]{
-	 o.pedreiros = p => p.obra = o
+	 pedreirosDaObra[o] = p <=> p.obra = o
 }
 
 pred engenheiroNaoTrabalhaComPintores[e:Engenheiro, p:EquipeDePintores]{
